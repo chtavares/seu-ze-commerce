@@ -6,7 +6,7 @@ const papa = require('papaparse');
 const configs = {
   development: {
     db: {
-      host: 'localhost',
+      host: 'database',
       port: 3306,
       user: 'root',
       password: 'root',
@@ -16,8 +16,7 @@ const configs = {
   production: {},
 };
 
-const isProduction = process.env.NODE_ENV === 'development';
-const config = isProduction ? configs.production : configs.development;
+const config = configs.development;
 
 const conn = mysql2.createConnection({
   host: config.db.host,

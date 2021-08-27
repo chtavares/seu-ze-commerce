@@ -25,7 +25,7 @@ const entities = [ProductEntity, OrderEntity, OrderProductEntity];
       keepConnectionAlive: true,
       logging: false,
       maxQueryExecutionTime: 60000,
-      synchronize: false,
+      synchronize: true,
       entities,
     }),
     ConfigModule.forRoot({

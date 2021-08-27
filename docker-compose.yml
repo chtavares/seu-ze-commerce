@@ -1,0 +1,76 @@
+version: '3.7'
+
+networks:
+  seuzenetwork:
+    external: true
+    name: 'seuzenetwork'
+
+services:
+  database:
+    container_name: seuzecommerce.vm-database
+    build:
+      context: mysql
+      dockerfile: Dockerfile
+    restart: always
+    command: --skip-partition --max_allowed_packet=32505856 --character-set-server=utf8mb4 --innodb_file_format=barracuda --innodb_large_prefix=1 --collation-server=utf8mb4_general_ci
+    logging:
+      driver: json-file
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=seuzecommerce
+    volumes:
+      - './mysql_data:/var/lib/mysql'
+    ports:
+      - 63307:3306
+    networks:
+      - seuzenetwork
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 800M
+
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    networks:
+      - seuzenetwork
+    ports:
+      - 5672:5672
+      - 15672:15672
+  stock-service:
+    image: deliverymuch/backend-challenge:stock-service
+    networks:
+      - seuzenetwork
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+    restart: on-failure
+
+  seuzecommerce:
+    networks:
+      - seuzenetwork
+    depends_on:
+      - database
+      - rabbitmq
+    ports:
+      - 63000:80
+    environment:
+      - NODE_ENV=development
+      - APP_ENV=development
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start:dev
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./public:/usr/src/app/public
+      - ./config:/usr/src/app/config
+      - ./migrations/:/usr/src/app/migrations
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
