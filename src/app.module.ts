@@ -4,11 +4,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ENVIRONMENT } from './env-defaults';
 import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
-import './env-defaults';
 import { RabbitModule } from './rabbitMQ/rabbitmq.module';
+import ormconfig from './ormconfig';
+import './env-defaults';
+import { ProductEntity } from './product/entities/product.entity';
+import { OrderEntity } from './order/entities/order.entity';
+import { OrderProductEntity } from './order/entities/order-products.entity';
 
 const imports = [ProductModule, OrderModule, RabbitModule];
-const entities = [];
+const entities = [ProductEntity, OrderEntity, OrderProductEntity];
+
+console.log({ ...ormconfig });
 
 @Module({
   imports: [
@@ -20,8 +26,10 @@ const entities = [];
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       keepConnectionAlive: true,
-      entities,
+      logging: true,
+      maxQueryExecutionTime: 60000,
       synchronize: false,
+      entities,
     }),
     ConfigModule.forRoot({
       envFilePath: `.${ENVIRONMENT}.env`,
