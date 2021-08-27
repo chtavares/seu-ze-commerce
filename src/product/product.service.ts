@@ -55,7 +55,8 @@ export class ProductService {
 
   @Transactional()
   private async incrementProductStock(name: string): Promise<void> {
-    const product = await this.productRepository.findOne({ name });
+    const product =
+      await this.productRepository.findOneByNameAndThereIsQuantity(name, 0);
     if (!product) {
       console.log(`There is not product ${name}`);
       return;
@@ -69,7 +70,7 @@ export class ProductService {
   @Transactional()
   private async decrementProductStock(name: string): Promise<void> {
     const product =
-      await this.productRepository.findOneByNameAndThereIsQuantity(name);
+      await this.productRepository.findOneByNameAndThereIsQuantity(name, 1);
     if (!product) {
       console.log(`There is not product ${name}`);
       return;
