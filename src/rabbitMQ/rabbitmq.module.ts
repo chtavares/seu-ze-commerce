@@ -1,5 +1,7 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
+import { ProductModule } from '../product/product.module';
+import { ProductService } from '../product/product.service';
 import { RabbitMQService } from './rabbitmq.service';
 
 @Module({
@@ -14,6 +16,7 @@ import { RabbitMQService } from './rabbitmq.service';
       uri: process.env.RABBITMQ_HOST,
     }),
     RabbitModule,
+    ProductModule,
   ],
   providers: [RabbitMQService],
 })

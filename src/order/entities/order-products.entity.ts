@@ -17,10 +17,10 @@ export class OrderProductEntity {
   @Column()
   quantity: number;
 
-  @ManyToOne((type) => ProductEntity, (product) => product.orders)
+  @ManyToOne((type) => ProductEntity, (product) => product.orderProducts)
   product: ProductEntity;
 
-  @ManyToOne((type) => OrderEntity, (order) => order.products)
+  @ManyToOne((type) => OrderEntity, (order) => order.orderProducts)
   order: OrderEntity;
 
   @CreateDateColumn()

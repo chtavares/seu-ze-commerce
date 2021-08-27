@@ -23,9 +23,12 @@ export class ProductEntity {
   @Column({ type: 'float' })
   price: number;
 
-  @OneToMany((type) => OrderProductEntity, (orderProduct) => orderProduct.order)
+  @OneToMany(
+    (type) => OrderProductEntity,
+    (orderProduct) => orderProduct.product,
+  )
   @JoinColumn()
-  orders: OrderProductEntity[];
+  orderProducts: OrderProductEntity[];
 
   @CreateDateColumn()
   createdAt: string;
