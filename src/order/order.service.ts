@@ -22,7 +22,7 @@ export class OrderService {
   async create({ products }: CreateOrderDto): Promise<IReturnOrderData> {
     const order = await this.orderRepository.save({ total: 0 });
 
-    let sumTotal = 0;
+    const arrayPrices: number[] = [];
     await Promise.all(
       products.map(async ({ name, quantity }) => {
         const product =
@@ -33,10 +33,13 @@ export class OrderService {
         if (!product) {
           throw Error(`There is not sufficient product ${name} quantity`);
         }
-        sumTotal = sumTotal + quantity * product.price;
+
+        arrayPrices.push(quantity * product.price);
+
         await this.productService.update(product.id, {
           quantity: product.quantity - quantity,
         });
+
         return this.orderProductRepository.save({ order, product, quantity });
       }),
     ).catch((err) => {
@@ -45,7 +48,7 @@ export class OrderService {
 
     await this.orderRepository.save({
       ...order,
-      total: sumTotal,
+      total: arrayPrices.reduce((acc, price) => acc + price, 0),
     });
 
     const newOrder = await this.orderRepository.findOrderById(order.id);

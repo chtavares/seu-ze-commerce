@@ -6,7 +6,7 @@ import { ProductEntity } from './product.entity';
 export class ProductRepository extends BaseRepository<ProductEntity> {
   async findOneByNameAndThereIsQuantity(
     name: string,
-    quantity = 0,
+    quantity: number,
   ): Promise<ProductEntity> {
     return this.createQueryBuilder('product')
       .where('name = :name', { name })
