@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateResult } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
@@ -15,8 +19,11 @@ export class ProductService {
   ) {}
 
   async findOneByName(productName: string): Promise<IFindProductByName> {
-    const { name, price, quantity } =
-      await this.productRepository.findOneOrFail({ name: productName });
+    const { name, price, quantity } = await this.productRepository
+      .findOneOrFail({ name: productName })
+      .catch(() => {
+        throw new NotFoundException(`Product ${productName} not found!`);
+      });
 
     return { name, price, quantity };
   }
@@ -31,6 +38,7 @@ export class ProductService {
     );
   }
 
+  @Transactional()
   async update(
     id: string,
     data: Partial<ProductEntity>,
@@ -42,7 +50,7 @@ export class ProductService {
   async handleStockProduct(
     productName: string,
     type: ERabbitmqRouteKey,
-  ): Promise<void> {
+  ): Promise<boolean> {
     switch (type) {
       case ERabbitmqRouteKey.INCREMENTED:
         return this.incrementProductStock(productName);
@@ -54,30 +62,32 @@ export class ProductService {
   }
 
   @Transactional()
-  private async incrementProductStock(name: string): Promise<void> {
+  private async incrementProductStock(name: string): Promise<boolean> {
     const product =
       await this.productRepository.findOneByNameAndThereIsQuantity(name, 0);
     if (!product) {
-      console.log(`There is not product ${name}`);
-      return;
+      return false;
     }
 
     await this.update(product.id, {
       quantity: product.quantity + 1,
     });
+
+    return true;
   }
 
   @Transactional()
-  private async decrementProductStock(name: string): Promise<void> {
+  private async decrementProductStock(name: string): Promise<boolean> {
     const product =
       await this.productRepository.findOneByNameAndThereIsQuantity(name, 1);
     if (!product) {
-      console.log(`There is not product ${name}`);
-      return;
+      return false;
     }
 
     await this.update(product.id, {
       quantity: product.quantity - 1,
     });
+
+    return true;
   }
 }

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { ProductService } from '../product/product.service';
@@ -57,14 +61,19 @@ export class OrderService {
   }
 
   async findAll(): Promise<IReturnOrderData[]> {
-    const orders = await this.orderRepository.findAll();
+    const orders = await this.orderRepository.findAllWithProducts();
     return orders.map(
       (order) => this.buildReturnedOrder(order) as IReturnOrderData,
     );
   }
 
   async findOne(orderId: string): Promise<IReturnOrderData> {
-    const order = await this.orderRepository.findOrderById(orderId);
+    const order = await this.orderRepository
+      .findOrderById(orderId)
+      .catch(() => {
+        throw new NotFoundException(`Order id: ${orderId} not found!`);
+      });
+
     return this.buildReturnedOrder(order);
   }
 

@@ -11,7 +11,7 @@ export class RabbitMQService {
     exchange: process.env.RABBITMQ_EXCHANGE,
     routingKey: ERabbitmqRouteKey.INCREMENTED,
   })
-  async incrementedHandler(productName: string): Promise<void> {
+  async incrementedHandler(productName: string): Promise<boolean> {
     return this.productService.handleStockProduct(
       productName,
       ERabbitmqRouteKey.INCREMENTED,
@@ -22,7 +22,7 @@ export class RabbitMQService {
     exchange: process.env.RABBITMQ_EXCHANGE,
     routingKey: ERabbitmqRouteKey.DECREMENTED,
   })
-  async decrementedHandler(productName: string): Promise<void> {
+  async decrementedHandler(productName: string): Promise<boolean> {
     return await this.productService.handleStockProduct(
       productName,
       ERabbitmqRouteKey.DECREMENTED,

@@ -12,7 +12,7 @@ export class OrderRepository extends BaseRepository<OrderEntity> {
       .getOneOrFail();
   }
 
-  async findAll(): Promise<OrderEntity[]> {
+  async findAllWithProducts(): Promise<OrderEntity[]> {
     return this.createQueryBuilder('order')
       .innerJoinAndSelect('order.orderProducts', 'orderProducts')
       .innerJoinAndSelect('orderProducts.product', 'product')
